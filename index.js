@@ -144,10 +144,11 @@ let uploadFileToS3 = (path, awsConfigs) => {
             region: awsConfigs.region
         });
 
+        //Add your bucket name in the bucket name field
         let bodyBuffer = new Buffer(fs.readFileSync(path));
         let today = Date.now();
         let uploadFileData = {
-            Bucket: 'lambda-processed-images-medium',
+            Bucket: 'your-bucket-name',
             Key: `${today}.webp`,
             ACL: 'public-read',
             StorageClass: 'REDUCED_REDUNDANCY',
