@@ -15,21 +15,12 @@ let decrypted = {};
 
 exports.handler = async (event) => {
 
-    console.log("event is ");
-    console.log(event);
-
     try {
 
         let imageData = JSON.parse(event.body);
 
-        console.log("imageData is ");
-        console.log(imageData);
-
         //Obtain aws configs via kms decoder
         const awsConfigs = await kmsDecoder();
-
-        console.log("awsConfigs are ");
-        console.log(awsConfigs);
 
         let destPath = await downloadFile(imageData, awsConfigs);
 
@@ -85,20 +76,11 @@ let downloadFile = (imageData, awsConfigs) => {
             region: awsConfigs.region
         });
 
-        console.log("imageData in download file is ");
-        console.log(imageData);
-        console.log("awsConfigs is "+awsConfigs);
-        console.log("typeof imageData is "+typeof(imageData));
-
         let rawImage = imageData.rawImage;
-
-        console.log("rawImage is "+rawImage);
 
         let fileExtension = rawImage.key.slice(rawImage.key.lastIndexOf('.'));
 
         fileExtension = (!fileExtension || fileExtension === '') ? 'jpeg' : fileExtension;
-
-        console.log("fileExtension is "+fileExtension);
 
         const destPath = `/tmp/${imageData.fileName}${fileExtension}`;
 
@@ -106,12 +88,6 @@ let downloadFile = (imageData, awsConfigs) => {
             Bucket: `${rawImage.bucket}`,
             Key: `${rawImage.key}`
         }
-
-        console.log("params in download file are ");
-        console.log(params);
-
-        console.log("destPath is ");
-        console.log(destPath);
 
         const s3Stream2 = s3.getObject(params).createReadStream();
 
@@ -144,9 +120,6 @@ let convertJpgToWebp = (path, data) => {
 
     return new Promise((resolve, reject) => {
 
-        console.log("path is ");
-        console.log(path);
-
         sharp(path)
             .resize(720)
             .toFile(`/tmp/${data.fileName}-converted.webp`, (err, info) => {
@@ -163,7 +136,6 @@ let convertJpgToWebp = (path, data) => {
 }
 
 let uploadFileToS3 = (path, awsConfigs) => {
-
     return new Promise((resolve, reject) => {
 
         let s3 = new AWS.S3({
@@ -172,16 +144,8 @@ let uploadFileToS3 = (path, awsConfigs) => {
             region: awsConfigs.region
         });
 
-        let obj = {
-            accessKeyId: awsConfigs.accessKeyId,
-            secretAccessKey: awsConfigs.secretAccessKey,
-            region: awsConfigs.region
-        }
-
         let bodyBuffer = new Buffer(fs.readFileSync(path));
-
         let today = Date.now();
-
         let uploadFileData = {
             Bucket: 'lambda-processed-images-medium',
             Key: `${today}.webp`,
@@ -192,27 +156,16 @@ let uploadFileToS3 = (path, awsConfigs) => {
             Body: bodyBuffer
         }
 
-        console.log("uploadFileData is "+JSON.stringify(uploadFileData));
-        console.log("aws configs are "+JSON.stringify(obj));
-        console.log("path is "+path);
-
         s3.upload(uploadFileData, (err, data) => {
-
             if (err) {
-
                 console.log("err is ");
                 console.log(err);
                 reject(err);
             } else {
-
-                console.log("data after file upload is ");
-                console.log(data);
-
                 let resultantData = {
                     baseUrl: baseUrl(data.Location),
                     path: data.Key
                 }
-
                 resolve(resultantData);
             }
         });
