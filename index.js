@@ -76,11 +76,13 @@ let downloadFile = (imageData, awsConfigs) => {
             region: awsConfigs.region
         });
 
+        //The raw image object contains the bucket name and the unique key of the image that needs to be processed.
+        //They key would ideally be named as "my-image.jpeg"
         let rawImage = imageData.rawImage;
 
         let fileExtension = rawImage.key.slice(rawImage.key.lastIndexOf('.'));
 
-        fileExtension = (!fileExtension || fileExtension === '') ? 'jpeg' : fileExtension;
+        fileExtension = (!fileExtension || fileExtension === '') ? '.jpeg' : fileExtension;
 
         const destPath = `/tmp/${imageData.fileName}${fileExtension}`;
 
