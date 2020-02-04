@@ -13,6 +13,7 @@ const encrypted = {
 
 let decrypted = {};
 
+//Lambda triggered by an event here
 exports.handler = async (event) => {
 
     try {
@@ -22,16 +23,19 @@ exports.handler = async (event) => {
         //Obtain aws configs via kms decoder
         const awsConfigs = await kmsDecoder();
 
+        //Download the image to process
         let destPath = await downloadFile(imageData, awsConfigs);
 
+        //Process the downloaded image
         let obtainedWebpFile = await convertJpgToWebp(destPath, imageData);
 
+        //Upload processed files to s3
         let uploadedData = await uploadFileToS3(obtainedWebpFile, awsConfigs);
 
         fs.unlink(destPath);
         fs.unlink(obtainedWebpFile);
 
-        return "success"; //{"message": "success"}
+        return "success";
     } catch (err) {
 
         return err;
